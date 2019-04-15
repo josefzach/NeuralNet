@@ -1,2 +1,2 @@
 # NeuralNet
-A (deep) neural network framework written in Python from scratch
+A (deep) neural network framework written from scratch in Python
