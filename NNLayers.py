@@ -39,7 +39,7 @@ class FeedFwdLayer( NNLayer ):
         self.nnodes_prev = nnodes_prev
     
     def InitParams( self ):
-        self.W = np.random.uniform( 0, 1, (self.nnodes, self.nnodes_prev) )
+        self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
         self.b = np.zeros( ( self.nnodes, 1 ) )
         
     def ForwardProp( self, X ):
@@ -66,7 +66,10 @@ class InputLayer:
         
     def __init__( self, data ):
         self.Z = 0
+        self.dZ = 0
+        self.dW = 0
         self.W = 0
+        self.b = 0
         self.A = data
         self.nnodes = np.shape( self.A )[0]
         
