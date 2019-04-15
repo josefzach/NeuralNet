@@ -14,6 +14,7 @@ class Sigmoid:
         return y
     
     def gradient( self, x ):
+        #print( 'Sigmoid gradient input: %f' % (x) )
         func = self( x )
         y = np.multiply( func, ( 1 - func ) )
         return y
