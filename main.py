@@ -10,9 +10,8 @@ np.random.seed(3) # set a seed so that the results are consistent
 
 DNN = list()
 
-nepochs = 1000
-nsamples = 400
-alpha = 1.2
+nepochs = 50000
+alpha = 0.5
 
 ####################################
 def load_planar_dataset():
@@ -37,10 +36,19 @@ def load_planar_dataset():
     return X, Y
 ####################################
 
-X, Y = load_planar_dataset()
+def load_sign_class_dataset( n ):
+    
+    X = np.random.randn( 1, n ) * 0.01
+    Y = ( X >= 0 )
+    return X, Y
+
+#nsamples = 10
+#X, Y = load_planar_dataset()
+X, Y = load_sign_class_dataset( 100 )
 
 DNN.append( NNLayers.InputLayer( X ) )
-DNN.append( NNLayers.FeedFwdLayer( nnodes=4, actfcn='Tanh' ) )
+DNN.append( NNLayers.FeedFwdLayer( nnodes=10, actfcn='Tanh' ) )
+#DNN.append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='ReLU' ) )
 DNN.append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
 
 nlayers = len( DNN )
@@ -67,7 +75,7 @@ for j in range( nepochs ):
         #print( 'W%i: ' % (i), DNN[i].W )
         
     # compute cost
-    C = -1/nsamples * np.sum( CrossEntropyFcn( Y, A ) )
+    C = -1/np.shape( A )[1] * np.sum( CrossEntropyFcn( Y, A ) )
     
     # initialize gradient (why needs negative gradient?)
     dA = - CrossEntropyFcn.gradient( Y, A )
@@ -88,5 +96,33 @@ for j in range( nepochs ):
         print( '========= EPOCH %i =========' % (j) )
         print( 'Cost:', C )
     
-print( 'Cost:', C )    
+
+X, Y = load_sign_class_dataset( 1000 )
+print( np.shape(X) ), print( np.shape(Y) )
 # predict
+
+DNN[0].SetData( X ) #ugly, get rid of InputLayer!!
+for i in range( nlayers ):
+    #print( i )
+    A = DNN[i].ForwardProp( A )
+    print( np.shape(DNN[i].A) )
+    #print( 'A%i: ' % (i), DNN[i].A )
+    #print( 'W%i: ' % (i), DNN[i].W )
+
+Yest = ( A >= 0.5 )
+r = 1/np.shape( Yest )[1] * np.sum( Y == Yest ) * 100
+print( '%f percent correct' % (r) )
+
+n = 500
+X = np.array( [ np.arange(-250,250)/500 ] )
+
+DNN[0].SetData( X ) #ugly, get rid of InputLayer!!
+for i in range( nlayers ):
+    #print( i )
+    A = DNN[i].ForwardProp( A )
+    print( np.shape(DNN[i].A) )
+    #print( 'A%i: ' % (i), DNN[i].A )
+    #print( 'W%i: ' % (i), DNN[i].W )
+    
+plt.plot( X.T, A.T )
+plt.show()

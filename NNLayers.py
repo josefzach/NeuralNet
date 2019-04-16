@@ -72,6 +72,10 @@ class InputLayer:
         self.b = 0
         self.A = data
         self.nnodes = np.shape( self.A )[0]
+    
+    def SetData( self, data ):
+        self.A = data
+        self.nnodes = np.shape( self.A )[0]
         
     def GetNNodes( self ):
         return self.nnodes
