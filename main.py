@@ -90,7 +90,7 @@ for j in range( nepochs ):
     # update parameters
     for i in range( nlayers ):
         #print( i )
-        A = DNN[i].Update( alpha )
+        A = DNN[i].UpdateParams( alpha )
         
     if j % 100 == 0:
         print( '========= EPOCH %i =========' % (j) )

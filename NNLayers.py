@@ -2,25 +2,38 @@ import numpy as np
 import ActivationFunctions as Activation
 
 class NNLayer:
+    def __init__( self ):
+        self.W = None
+        self.dW = None
+        self.b = None
+        self.db = None
+        self.Z = None
+        self.dZ = None
+        self.A = None
+        self.dA = None
+        self.nnodes = None
+
     def ForwardProp( self, X ):
         raise NotImplementedError( 'Class %s does not implement method ForwardProp()' % (self.__class__.__name__) )
     def BackwardProp( self, dX ):
         raise NotImplementedError( 'Class %s does not implement method BackwardProp()' % (self.__class__.__name__) )
+    def UpdateParams( self ):
+        raise NotImplementedError( 'Class %s does not implement method UpdateParams()' % (self.__class__.__name__) )
+    def GetNNodes( self ):
+        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
+    def InitParams( self ):
+        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
 
 class FeedFwdLayer( NNLayer ):
-    def __init__( self, nnodes = 5, actfcn = 'ReLU' ):
-        self.nnodes = nnodes
+    def __init__( self, nnodes, actfcn ):
+        super( FeedFwdLayer, self ).__init__()
         self.nnodes_prev = None
-        self.nsamples = None
-        self.actfcn = Activation.Factory( actfcn )
-        self.W = None
-        self.b = None
-        self.X = None
-        self.Z = None
-        self.A = None
-        self.dA = None
         self.A_prev = None
         self.dA_prev = None
+        self.nsamples = None
+        
+        self.nnodes = nnodes
+        self.actfcn = Activation.Factory( actfcn )
         
     def __add__( self, other ):
         print( 'SELF:', self ), print( 'OTHER:', other )
@@ -57,24 +70,22 @@ class FeedFwdLayer( NNLayer ):
         self.dA_prev = np.dot( np.transpose( self.W ), self.dZ )
         return self.dA_prev
         
-    def Update( self, alpha ):
+    def UpdateParams( self, alpha ):
         self.W = self.W - alpha * self.dW
         self.b = self.b - alpha * self.db
 
-# could this be derived from FeedFwdLayer?
-class InputLayer:
-        
-    def __init__( self, data ):
-        self.Z = 0
-        self.dZ = 0
-        self.dW = 0
-        self.W = 0
-        self.b = 0
-        self.A = data
+class InputLayer( NNLayer ):
+    def __init__( self, inputData ):
+        super( InputLayer, self ).__init__ ()
+
+        self.A = inputData
         self.nnodes = np.shape( self.A )[0]
     
-    def SetData( self, data ):
-        self.A = data
+    def InitParams( self ):
+        pass
+
+    def SetData( self, inputData ): # requires update of A_prev in following layer!!
+        self.A = inputData
         self.nnodes = np.shape( self.A )[0]
         
     def GetNNodes( self ):
@@ -86,6 +97,6 @@ class InputLayer:
     def BackwardProp( self, dA ):
         return None
         
-    def Update( self, alpha ):
+    def UpdateParams( self, alpha ):
         pass
         
