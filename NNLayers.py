@@ -1,5 +1,6 @@
 import numpy as np
-import ActivationFunctions as Activation
+import ActivationFunctions
+import LossFunctions
 
 class NNLayer:
     def __init__( self ):
@@ -14,15 +15,20 @@ class NNLayer:
         self.nnodes = None
         
     def Initialize( self ):
-        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
-    def ForwardProp( self, X ):
-        raise NotImplementedError( 'Class %s does not implement method ForwardProp()' % (self.__class__.__name__) )
-    def BackwardProp( self, dX ):
-        raise NotImplementedError( 'Class %s does not implement method BackwardProp()' % (self.__class__.__name__) )
-    def UpdateParams( self ):
-        raise NotImplementedError( 'Class %s does not implement method UpdateParams()' % (self.__class__.__name__) )
+        #raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
+        pass
+    def ForwardProp( self, A_prev ):
+        #raise NotImplementedError( 'Class %s does not implement method ForwardProp()' % (self.__class__.__name__) )
+        pass
+    def BackwardProp( self, dA ):
+        #raise NotImplementedError( 'Class %s does not implement method BackwardProp()' % (self.__class__.__name__) )
+        pass
+    def UpdateParams( self, alpha ):
+        #raise NotImplementedError( 'Class %s does not implement method UpdateParams()' % (self.__class__.__name__) )   
+        pass
     def GetNNodes( self ):
-        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
+        #raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
+        pass
 
 class FeedFwdLayer( NNLayer ):
     def __init__( self, nnodes, actfcn ):
@@ -33,7 +39,7 @@ class FeedFwdLayer( NNLayer ):
         self.nsamples = None
         
         self.nnodes = nnodes
-        self.actfcn = Activation.Factory( actfcn )
+        self.actfcn = ActivationFunctions.Factory( actfcn )
         
     def __add__( self, other ):
         print( 'SELF:', self ), print( 'OTHER:', other )
@@ -75,42 +81,42 @@ class FeedFwdLayer( NNLayer ):
         self.b = self.b - alpha * self.db
 
 class InputLayer( NNLayer ):
-    def __init__( self, inputData ):
+    def __init__( self, X ):
         super( InputLayer, self ).__init__ ()
+        self.X = X
+        self.nnodes = np.shape( self.X )[0]
 
-        self.A = inputData
-        self.nnodes = np.shape( self.A )[0]
-    
-    def Initialize( self ):
-        pass
-
-    def SetData( self, inputData ): # requires update of A_prev in following layer!!
-        self.A = inputData
-        self.nnodes = np.shape( self.A )[0]
+    def SetData( self, X ): # requires update of A_prev in following layer!!
+        self.X = X
+        self.nnodes = np.shape( self.X )[0]
         
     def GetNNodes( self ):
         return self.nnodes
         
     def ForwardProp( self, A_prev ):
-        return self.A
+        return self.X
         
     def BackwardProp( self, dA ):
         return None
         
-    def UpdateParams( self, alpha ):
-        pass
-        
 class OutputLayer( NNLayer ):
-    def __init__( self, lossFcn ):
-        super( InputLayer, self ).__init__ ()
+    def __init__( self, Y, lossFcn ):
+        super( OutputLayer, self ).__init__ ()
         
+        self.Y = Y
         self.lossFcn = LossFunctions.Factory( lossFcn )
+        self.L = None
+        self.nnodes_prev = None
     
-    def ForwardProp( self, X ):
-        self.nsamples = np.shape( X )[1]
-        self.Z = self.X
-        self.A = self.lossFcn( self.X )
-        return self.A
+    def ForwardProp( self, A_prev ):
+        self.nsamples = np.shape( A_prev )[1]
+        self.A_prev = A_prev
+        self.L = self.lossFcn( self.Y, self.A_prev )
+        return self.L
         
     def BackwardProp( self, dA ):
-        return self.lossfcn.gradient
+        return -self.lossFcn.gradient( self.Y, self.A_prev )  #why negative gradient?
+
+    def SetNNodesPrev( self, nnodes_prev ):
+        self.nnodes_prev = nnodes_prev
+

@@ -1,6 +1,7 @@
 import NNLayers
 import numpy as np
 import ActivationFunctions
+import LossFunctions
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
@@ -10,8 +11,8 @@ np.random.seed(3) # set a seed so that the results are consistent
 
 DNN = list()
 
-nepochs = 50000
-alpha = 0.5
+nepochs = 10000
+alpha = 0.1
 
 ####################################
 def load_planar_dataset():
@@ -38,24 +39,24 @@ def load_planar_dataset():
 
 def load_sign_class_dataset( n ):
     
-    X = np.random.randn( 1, n ) * 0.01
+    X = np.random.randn( 1, n ) * 0.1
     Y = ( X >= 0 )
     return X, Y
 
 #nsamples = 10
 #X, Y = load_planar_dataset()
-X, Y = load_sign_class_dataset( 100 )
+X, Y = load_sign_class_dataset( 1000 )
 
 DNN.append( NNLayers.InputLayer( X ) )
-DNN.append( NNLayers.FeedFwdLayer( nnodes=10, actfcn='Tanh' ) )
+DNN.append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
 #DNN.append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='ReLU' ) )
 DNN.append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
 
 nlayers = len( DNN )
 
-CrossEntropyFcn = ActivationFunctions.CrossEntropy()
+CrossEntropyFcn = LossFunctions.Factory( 'CrossEntropy' )
 
-np.random.seed(2)
+#np.random.seed(2)
 # initialization
 for i in range( 1, nlayers ):   
     DNN[i].SetNNodesPrev( DNN[i-1].GetNNodes() )
@@ -126,3 +127,5 @@ for i in range( nlayers ):
     
 plt.plot( X.T, A.T )
 plt.show()
+
+# Cost: 0.043102522349
