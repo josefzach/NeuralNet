@@ -12,7 +12,9 @@ class NNLayer:
         self.A = None
         self.dA = None
         self.nnodes = None
-
+        
+    def Initialize( self ):
+        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
     def ForwardProp( self, X ):
         raise NotImplementedError( 'Class %s does not implement method ForwardProp()' % (self.__class__.__name__) )
     def BackwardProp( self, dX ):
@@ -20,8 +22,6 @@ class NNLayer:
     def UpdateParams( self ):
         raise NotImplementedError( 'Class %s does not implement method UpdateParams()' % (self.__class__.__name__) )
     def GetNNodes( self ):
-        raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
-    def InitParams( self ):
         raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
 
 class FeedFwdLayer( NNLayer ):
@@ -51,14 +51,14 @@ class FeedFwdLayer( NNLayer ):
     def SetNNodesPrev( self, nnodes_prev ):
         self.nnodes_prev = nnodes_prev
     
-    def InitParams( self ):
+    def Initialize( self ):
         self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
         self.b = np.zeros( ( self.nnodes, 1 ) )
         
-    def ForwardProp( self, X ):
-        self.nsamples = np.shape( X )[1]
-        self.A_prev = X
-        self.Z = np.dot( self.W, X ) + self.b
+    def ForwardProp( self, A_prev ):
+        self.nsamples = np.shape( A_prev )[1]    # TODO: do not compute nsamples on each epoch
+        self.A_prev = A_prev
+        self.Z = np.dot( self.W, self.A_prev ) + self.b
         self.A = self.actfcn( self.Z )
         return self.A
         
@@ -81,7 +81,7 @@ class InputLayer( NNLayer ):
         self.A = inputData
         self.nnodes = np.shape( self.A )[0]
     
-    def InitParams( self ):
+    def Initialize( self ):
         pass
 
     def SetData( self, inputData ): # requires update of A_prev in following layer!!
@@ -91,7 +91,7 @@ class InputLayer( NNLayer ):
     def GetNNodes( self ):
         return self.nnodes
         
-    def ForwardProp( self, X ):
+    def ForwardProp( self, A_prev ):
         return self.A
         
     def BackwardProp( self, dA ):
@@ -100,3 +100,17 @@ class InputLayer( NNLayer ):
     def UpdateParams( self, alpha ):
         pass
         
+class OutputLayer( NNLayer ):
+    def __init__( self, lossFcn ):
+        super( InputLayer, self ).__init__ ()
+        
+        self.lossFcn = LossFunctions.Factory( lossFcn )
+    
+    def ForwardProp( self, X ):
+        self.nsamples = np.shape( X )[1]
+        self.Z = self.X
+        self.A = self.lossFcn( self.X )
+        return self.A
+        
+    def BackwardProp( self, dA ):
+        return self.lossfcn.gradient

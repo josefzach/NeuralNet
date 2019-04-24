@@ -4,7 +4,9 @@ class NeuralNet:
     def __init__( self ):
         self.nnLayers = list()
         self.numLayers = 0
-        pass
+        
+        self.Cost = numpy.array([])
+        
 
     def Append( self, nnLayer ):
         self.nnLayers.append( nnLayer )
@@ -14,12 +16,13 @@ class NeuralNet:
             
         self.numLayers += 1
 
-    def ForwardProp( self, A ):
+    def ForwardProp( self ):
         A = None
         for i in range( self.numLayers ):
             A = self.nnLayers[i].ForwardProp( A )
 
     def BackwardProp( self, dA ):
+        dA = None
         for i in range( self.numLayers-1, -1, -1 ):
             dA = self.nnLayers[i].BackwardProp( dA )  
 
@@ -31,3 +34,12 @@ class NeuralNet:
     def ComputCost( self ):
         C = -1/np.shape( self.nnLayers[-1].A )[1] * np.sum( CrossEntropyFcn( Y, A ) )
 
+    def Iterate( self, nEpochs ):
+        for i in range( 0, nEpochs ):
+            self.ForwardProp()
+            self.BackwardProp()
+            self.UpdateParams()
+            self.ComputeCost()
+            
+    def Reset( self ):
+        pass

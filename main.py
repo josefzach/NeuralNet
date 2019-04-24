@@ -59,7 +59,7 @@ np.random.seed(2)
 # initialization
 for i in range( 1, nlayers ):   
     DNN[i].SetNNodesPrev( DNN[i-1].GetNNodes() )
-    DNN[i].InitParams()    
+    DNN[i].Initialize()    
     
 # main loop
 for j in range( nepochs ):
