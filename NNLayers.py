@@ -87,9 +87,10 @@ class InputLayer( NNLayer ):
         self.X = X
         self.nnodes = np.shape( self.X )[0]
 
-    def SetData( self, X ): # requires update of A_prev in following layer!!
+    def SetData( self, X ):
         self.X = X
         self.nnodes = np.shape( self.X )[0]
+        # catch case where shape(x)[0] changes --> re-training network required
         
     def GetNNodes( self ):
         return self.nnodes
@@ -105,19 +106,23 @@ class OutputLayer( NNLayer ):
         super( OutputLayer, self ).__init__ ()
         
         self.Y = Y
-        self.Yest = None
+        self.A_prev = None
         self.lossFcn = LossFunctions.Factory( lossFcn )
         self.L = None
         self.nnodes_prev = None
     
     def ForwardProp( self, A_prev ):
-        self.Yest = A_prev
-        self.L = self.lossFcn( self.Y, self.Yest )
+        self.A_prev = A_prev
+        self.L = self.lossFcn( self.Y, self.A_prev )
         return self.L
         
     def BackwardProp( self, dA ):
-        return -self.lossFcn.gradient( self.Y, self.Yest )  #why negative gradient?
+        return -self.lossFcn.gradient( self.Y, self.A_prev )  #why negative gradient?
 
     def SetNNodesPrev( self, nnodes_prev ):
         self.nnodes_prev = nnodes_prev
+
+    def SetData( self, Y ):
+        self.Y = Y
+        # catch dimension missmatch
 

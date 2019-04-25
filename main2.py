@@ -52,7 +52,13 @@ FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
 FFNet.Append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
 FFNet.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
 
+# Train Net
 FFNet.Train( nEpochs )
+
+# Evaluate Net
+X, Y = load_sign_class_dataset( 100 )
+rateCorrect = FFNet.Eval( X, Y )
+print( '=> Evaluating Net: Percent correct = %f' % (rateCorrect * 100) )
 
 plt.plot( FFNet.Cost )
 plt.show()

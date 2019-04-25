@@ -36,7 +36,7 @@ class NeuralNet:
             A = self.nnLayers[i].UpdateParams( alpha )
         
     def ComputeCost( self ):
-        loss = self.nnLayers[-1].L # TODO: fishy
+        loss = self.nnLayers[-1].L # 
         C = -1/np.shape( loss )[1] * np.sum( loss )
         self.Cost = np.append( self.Cost, np.array([[C]]) )
 
@@ -51,5 +51,13 @@ class NeuralNet:
                 print( '=> Epoch %i: Cost=%.6f, w1=%s' % (i,self.Cost[-1],np.array2string(self.nnLayers[1].W.T)) )       
                 #print( 'BackwardProp: dW=%s, db=%s' % (np.array2string(self.nnLayers[1].dW.T),np.array2string(self.nnLayers[1].db.T)) )        
    
+    def Eval( self, X, Y ):
+        self.nnLayers[0].SetData( X )
+        self.nnLayers[-1].SetData( Y )
+        self.ForwardProp()
+        Yest = ( self.nnLayers[-1].A_prev >= 0.5 )
+        rateCorrect = np.mean( Yest == Y )
+        return rateCorrect
+
     def Reset( self ):
         pass

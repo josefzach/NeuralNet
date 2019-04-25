@@ -98,7 +98,7 @@ for j in range( nepochs ):
         print( 'BackwardProp: dW=%s, db=%s' % (np.array2string(DNN[1].dW.T),np.array2string(DNN[1].db.T)) )        
     
 
-X, Y = load_sign_class_dataset( 1000 )
+X, Y = load_sign_class_dataset( 100 )
 print( np.shape(X) ), print( np.shape(Y) )
 # predict
 
