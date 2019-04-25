@@ -12,7 +12,7 @@ np.random.seed(3) # set a seed so that the results are consistent
 DNN = list()
 
 nepochs = 10000
-alpha = 0.1
+alpha = 0.5
 
 ####################################
 def load_planar_dataset():
@@ -94,8 +94,8 @@ for j in range( nepochs ):
         A = DNN[i].UpdateParams( alpha )
         
     if j % 100 == 0:
-        print( '========= EPOCH %i =========' % (j) )
-        print( 'Cost:', C )
+        print( '=> Epoch %i: Cost=%.6f, w1=%s' % (j,C,np.array2string(DNN[1].W.T)) )
+        print( 'BackwardProp: dW=%s, db=%s' % (np.array2string(DNN[1].dW.T),np.array2string(DNN[1].db.T)) )        
     
 
 X, Y = load_sign_class_dataset( 1000 )

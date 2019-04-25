@@ -5,6 +5,8 @@ class NeuralNet:
     def __init__( self ):
         self.nnLayers = list()
         self.nLayers = 0
+
+        # Hyperparameters
         self.learningRate = 0.5
 
         self.Cost = np.array([[]])
@@ -38,7 +40,7 @@ class NeuralNet:
         C = -1/np.shape( loss )[1] * np.sum( loss )
         self.Cost = np.append( self.Cost, np.array([[C]]) )
 
-    def Iterate( self, nEpochs ):
+    def Train( self, nEpochs ):
         for i in range( 0, nEpochs+1 ):
             self.ForwardProp()
             self.BackwardProp()
@@ -46,7 +48,8 @@ class NeuralNet:
             self.ComputeCost()
 
             if i % 100 == 0:
-                print( '=> Epoch %i: Cost=%.12f' % (i,self.Cost[-1]) )
-        
+                print( '=> Epoch %i: Cost=%.6f, w1=%s' % (i,self.Cost[-1],np.array2string(self.nnLayers[1].W.T)) )       
+                #print( 'BackwardProp: dW=%s, db=%s' % (np.array2string(self.nnLayers[1].dW.T),np.array2string(self.nnLayers[1].db.T)) )        
+   
     def Reset( self ):
         pass

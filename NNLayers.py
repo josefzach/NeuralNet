@@ -60,6 +60,7 @@ class FeedFwdLayer( NNLayer ):
     def Initialize( self ):
         self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
         self.b = np.zeros( ( self.nnodes, 1 ) )
+        print( 'Initializing Layer n with: W=%s, b= %s' % (np.array2string(self.W.T), np.array2string(self.b.T)) )
         
     def ForwardProp( self, A_prev ):
         self.nsamples = np.shape( A_prev )[1]    # TODO: do not compute nsamples on each epoch
@@ -73,7 +74,7 @@ class FeedFwdLayer( NNLayer ):
         self.dZ = np.multiply( self.dA, self.actfcn.gradient( self.Z ) )
         self.dW = 1 / self.nsamples * np.dot( self.dZ, np.transpose( self.A_prev ) )
         self.db = 1 / self.nsamples * np.sum( self.dZ, axis=1, keepdims=True )
-        self.dA_prev = np.dot( np.transpose( self.W ), self.dZ )
+        self.dA_prev = np.dot( np.transpose( self.W ), self.dZ )      
         return self.dA_prev
         
     def UpdateParams( self, alpha ):
@@ -104,18 +105,18 @@ class OutputLayer( NNLayer ):
         super( OutputLayer, self ).__init__ ()
         
         self.Y = Y
+        self.Yest = None
         self.lossFcn = LossFunctions.Factory( lossFcn )
         self.L = None
         self.nnodes_prev = None
     
     def ForwardProp( self, A_prev ):
-        self.nsamples = np.shape( A_prev )[1]
-        self.A_prev = A_prev
-        self.L = self.lossFcn( self.Y, self.A_prev )
+        self.Yest = A_prev
+        self.L = self.lossFcn( self.Y, self.Yest )
         return self.L
         
     def BackwardProp( self, dA ):
-        return -self.lossFcn.gradient( self.Y, self.A_prev )  #why negative gradient?
+        return -self.lossFcn.gradient( self.Y, self.Yest )  #why negative gradient?
 
     def SetNNodesPrev( self, nnodes_prev ):
         self.nnodes_prev = nnodes_prev

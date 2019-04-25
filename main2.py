@@ -46,13 +46,13 @@ def load_sign_class_dataset( n ):
 #X, Y = load_planar_dataset()
 X, Y = load_sign_class_dataset( 1000 )
 
-NN = NeuralNet.NeuralNet()
-NN.Append( NNLayers.InputLayer( X ) )
-NN.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
-NN.Append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
-NN.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
+FFNet = NeuralNet.NeuralNet()
+FFNet.Append( NNLayers.InputLayer( X ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
+FFNet.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
 
-NN.Iterate( nEpochs )
+FFNet.Train( nEpochs )
 
-plt.plot( NN.Cost )
+plt.plot( FFNet.Cost )
 plt.show()
