@@ -1,13 +1,16 @@
 import LossFunctions
 import numpy as np
+import matplotlib.pyplot as plt
 
 class NeuralNet:
-    def __init__( self ):
+    def __init__( self, LearningRate=0.5, InitMethod='He', RegularizationParam=0.0 ):
         self.nnLayers = list()
         self.nLayers = 0
 
         # Hyperparameters
-        self.learningRate = 0.5
+        self.initMethod = InitMethod
+        self.learningRate = LearningRate
+        self.regularizationParam = RegularizationParam
 
         self.Cost = np.array([[]])
         
@@ -16,7 +19,7 @@ class NeuralNet:
         
         if self.nLayers > 0:      
             self.nnLayers[-1].SetNNodesPrev( self.nnLayers[-2].GetNNodes() )
-            self.nnLayers[-1].Initialize()
+            self.nnLayers[-1].Initialize( initMethod=self.initMethod )
     
         self.nLayers += 1
 
@@ -36,8 +39,13 @@ class NeuralNet:
             A = self.nnLayers[i].UpdateParams( alpha )
         
     def ComputeCost( self ):
-        loss = self.nnLayers[-1].L # 
-        C = -1/np.shape( loss )[1] * np.sum( loss )
+        loss = self.nnLayers[-1].L
+        m = np.shape( loss )[1]
+        C = -1/m * np.sum( loss )
+        FN = 0
+        for i in range( 1, self.nLayers-1 ):
+            FN = FN + np.linalg.norm( self.nnLayers[i].W )
+        C = C + self.regularizationParam / (2*m) * FN
         self.Cost = np.append( self.Cost, np.array([[C]]) )
 
     def Train( self, nEpochs ):
@@ -58,6 +66,30 @@ class NeuralNet:
         Yest = ( self.nnLayers[-1].A_prev >= 0.5 )
         rateCorrect = np.mean( Yest == Y )
         return rateCorrect
-
+    
     def Reset( self ):
         pass
+
+    def Draw( self ):
+        fig, ax = plt.subplots() # note we must use plt.subplots, not plt.subplot
+        for i in range( self.nLayers-1 ):
+            for j in range( self.nnLayers[i].nnodes ):
+                xpos = 0+i*1
+                ypos = 0-(self.nnLayers[i].nnodes-1)/2+j
+                ax.plot(xpos, ypos, 'o',fillstyle='none',markersize=40, markeredgewidth=0.5, markeredgecolor=(0,0,0,0.5))
+
+
+        #circle2 = plt.Circle((0.5, 0.5), 0.2, color='blue')
+        #circle3 = plt.Circle((1, 1), 0.2, color='g', clip_on=False)
+
+
+        # (or if you have an existing figure)
+        # fig = plt.gcf()
+        # ax = fig.gca()
+
+        #ax.add_artist(circle1)
+        #ax.add_artist(circle2)
+        #ax.add_artist(circle3)
+        plt.ylim(-1, 1)
+        plt.xlim(-1, self.nLayers-1 )
+        plt.show()

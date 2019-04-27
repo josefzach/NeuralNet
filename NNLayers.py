@@ -14,7 +14,7 @@ class NNLayer:
         self.dA = None
         self.nnodes = None
         
-    def Initialize( self ):
+    def Initialize( self, **kwargs ):
         #raise NotImplementedError( 'Class %s does not implement method GetNNodes()' % (self.__class__.__name__) )
         pass
     def ForwardProp( self, A_prev ):
@@ -37,6 +37,7 @@ class FeedFwdLayer( NNLayer ):
         self.A_prev = None
         self.dA_prev = None
         self.nsamples = None
+        self.D = None
         
         self.nnodes = nnodes
         self.actfcn = ActivationFunctions.Factory( actfcn )
@@ -57,28 +58,41 @@ class FeedFwdLayer( NNLayer ):
     def SetNNodesPrev( self, nnodes_prev ):
         self.nnodes_prev = nnodes_prev
     
-    def Initialize( self ):
-        self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
+    def Initialize( self, initMethod='He', **kwargs ):
+        if initMethod == 'He':
+            self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * np.sqrt( 2 / self.nnodes_prev )
+        if initMethod == 'Xavier':
+            self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * np.sqrt( 1 / self.nnodes_prev )
+        else:
+            self.W = np.random.randn( self.nnodes,self.nnodes_prev )
+        
         self.b = np.zeros( ( self.nnodes, 1 ) )
         print( 'Initializing Layer n with: W=%s, b= %s' % (np.array2string(self.W.T), np.array2string(self.b.T)) )
         
-    def ForwardProp( self, A_prev ):
+    def ForwardProp( self, A_prev, keep_prob=1 ):
         self.nsamples = np.shape( A_prev )[1]    # TODO: do not compute nsamples on each epoch
         self.A_prev = A_prev
         self.Z = np.dot( self.W, self.A_prev ) + self.b
+
         self.A = self.actfcn( self.Z )
+
+        self.D = np.random.rand( self.A.shape[0], self.A.shape[1] )
+        self.D = self.D < keep_prob
+
+        self.A = self.A * self.D / keep_prob
+
         return self.A
         
-    def BackwardProp( self, dA ):
-        self.dA = dA
+    def BackwardProp( self, dA, keep_prob=1 ):
+        self.dA = dA * self.D / keep_prob
         self.dZ = np.multiply( self.dA, self.actfcn.gradient( self.Z ) )
         self.dW = 1 / self.nsamples * np.dot( self.dZ, np.transpose( self.A_prev ) )
         self.db = 1 / self.nsamples * np.sum( self.dZ, axis=1, keepdims=True )
         self.dA_prev = np.dot( np.transpose( self.W ), self.dZ )      
         return self.dA_prev
         
-    def UpdateParams( self, alpha ):
-        self.W = self.W - alpha * self.dW
+    def UpdateParams( self, alpha, lambd=0.0 ):
+        self.W = self.W - alpha * ( self.dW + lambd/self.nnodes*self.W )
         self.b = self.b - alpha * self.db
 
 class InputLayer( NNLayer ):

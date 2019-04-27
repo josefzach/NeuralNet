@@ -7,6 +7,8 @@ def Factory( actfcn ):
         return Sigmoid()
     elif actfcn == 'ReLU':
         return ReLU()
+    elif actfcn == 'SaLU':
+        return SaLU()
     elif actfcn == 'Tanh':
         return Tanh()
     else:
@@ -32,6 +34,19 @@ class ReLU:
     def gradient( self, x ):
         y = np.ones( np.shape( x ) )
         y[ x <= 0 ] = 0
+        return y
+
+class SaLU:
+    def __call__( self, x ):
+        y = x
+        y[ x > 1 ] = 1
+        y[ x < -1 ] = -1
+        return y
+    
+    def gradient( self, x ):
+        y = np.ones( np.shape( x ) )
+        y[ x > 1 ] = 0
+        y[ x < -1 ] = 0
         return y
 
 class Tanh:

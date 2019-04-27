@@ -10,13 +10,8 @@ np.random.seed(3) # set a seed so that the results are consistent
 
 DNN = list()
 
-nEpochs = 10000
-alpha = 0.1
-
 ####################################
-def load_planar_dataset():
-    np.random.seed(1)
-    m = nsamples # number of examples
+def load_planar_dataset( m ):
     N = int(m/2) # number of points per class
     D = 2 # dimensionality
     X = np.zeros((m,D)) # data matrix where each row is a single example
@@ -42,23 +37,33 @@ def load_sign_class_dataset( n ):
     Y = ( X >= 0 )
     return X, Y
 
-#nsamples = 1000
-#X, Y = load_planar_dataset()
-X, Y = load_sign_class_dataset( 1000 )
+X, Y = load_planar_dataset( 1000 )
+#X, Y = load_sign_class_dataset( 1000 )
 
-FFNet = NeuralNet.NeuralNet()
+nEpochs = 10000
+alpha = 0.5
+
+FFNet = NeuralNet.NeuralNet( LearningRate=alpha, InitMethod='He' )
 FFNet.Append( NNLayers.InputLayer( X ) )
-FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=10, actfcn='Sigmoid' ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=20, actfcn='Sigmoid' ) )
 FFNet.Append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
 FFNet.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
+
+# Visualize Net
+#FFNet.Draw()
+#exit()
 
 # Train Net
 FFNet.Train( nEpochs )
 
 # Evaluate Net
-X, Y = load_sign_class_dataset( 100 )
+X, Y = load_planar_dataset( 1000 )
+#X, Y = load_sign_class_dataset( 1000 )
 rateCorrect = FFNet.Eval( X, Y )
 print( '=> Evaluating Net: Percent correct = %f' % (rateCorrect * 100) )
+
+
 
 plt.plot( FFNet.Cost )
 plt.show()
