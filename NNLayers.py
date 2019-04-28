@@ -124,7 +124,7 @@ class OutputLayer( FeedFwdLayer ): #rather inherit from non-dropout layer?
         self.L = None
 
     def ForwardProp( self, A_prev ):
-        self.nsamples = np.shape( A_prev )[1]   # TODO: do not compute nsamples on each epoch
+        self.nsamples = np.shape( A_prev )[1]  # TODO: do not compute nsamples on each epoch
         self.A_prev = A_prev
         self.Z = np.dot( self.W, self.A_prev ) + self.b
 
