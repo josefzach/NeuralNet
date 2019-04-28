@@ -63,7 +63,7 @@ class NeuralNet:
         self.nnLayers[0].SetData( X )
         self.nnLayers[-1].SetData( Y )
         self.ForwardProp()
-        Yest = ( self.nnLayers[-1].A_prev >= 0.5 )
+        Yest = ( self.nnLayers[-1].A >= 0.5 )
         rateCorrect = np.mean( Yest == Y )
         return rateCorrect
     

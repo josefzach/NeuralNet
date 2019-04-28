@@ -64,12 +64,12 @@ class FeedFwdLayer( NNLayer ):
         if initMethod == 'Xavier':
             self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * np.sqrt( 1 / self.nnodes_prev )
         else:
-            self.W = np.random.randn( self.nnodes,self.nnodes_prev )
+            self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
         
         self.b = np.zeros( ( self.nnodes, 1 ) )
         print( 'Initializing Layer n with: W=%s, b= %s' % (np.array2string(self.W.T), np.array2string(self.b.T)) )
         
-    def ForwardProp( self, A_prev, keep_prob=1 ):
+    def ForwardProp( self, A_prev, keep_prob=0.7 ):
         self.nsamples = np.shape( A_prev )[1]    # TODO: do not compute nsamples on each epoch
         self.A_prev = A_prev
         self.Z = np.dot( self.W, self.A_prev ) + self.b
@@ -114,29 +114,34 @@ class InputLayer( NNLayer ):
         
     def BackwardProp( self, dA ):
         return None
-        
-class OutputLayer( NNLayer ):
-    def __init__( self, Y, lossFcn ):
-        super( OutputLayer, self ).__init__ ()
-        
-        self.Y = Y
-        self.A_prev = None
+
+class OutputLayer( FeedFwdLayer ): #rather inherit from non-dropout layer?
+    def __init__( self, nnodes, actfcn, Y, lossFcn ):
+        super( OutputLayer, self ).__init__( nnodes, actfcn )
+
+        self.Y = Y 
         self.lossFcn = LossFunctions.Factory( lossFcn )
         self.L = None
-        self.nnodes_prev = None
-    
+
     def ForwardProp( self, A_prev ):
+        self.nsamples = np.shape( A_prev )[1]   # TODO: do not compute nsamples on each epoch
         self.A_prev = A_prev
-        self.L = self.lossFcn( self.Y, self.A_prev )
-        return self.L
+        self.Z = np.dot( self.W, self.A_prev ) + self.b
+
+        self.A = self.actfcn( self.Z )
+        
+        self.L = self.lossFcn( self.Y, self.A )
+
+        return self.A
         
     def BackwardProp( self, dA ):
-        return -self.lossFcn.gradient( self.Y, self.A_prev )  #why negative gradient?
-
-    def SetNNodesPrev( self, nnodes_prev ):
-        self.nnodes_prev = nnodes_prev
+        self.dA = -self.lossFcn.gradient( self.Y, self.A )  #why negative gradient?
+        self.dZ = np.multiply( self.dA, self.actfcn.gradient( self.Z ) )
+        self.dW = 1 / self.nsamples * np.dot( self.dZ, np.transpose( self.A_prev ) )
+        self.db = 1 / self.nsamples * np.sum( self.dZ, axis=1, keepdims=True )
+        self.dA_prev = np.dot( np.transpose( self.W ), self.dZ )      
+        return self.dA_prev
 
     def SetData( self, Y ):
         self.Y = Y
         # catch dimension missmatch
-

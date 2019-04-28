@@ -37,18 +37,18 @@ def load_sign_class_dataset( n ):
     Y = ( X >= 0 )
     return X, Y
 
-X, Y = load_planar_dataset( 1000 )
-#X, Y = load_sign_class_dataset( 1000 )
+#X, Y = load_planar_dataset( 1000 )
+X, Y = load_sign_class_dataset( 1000 )
 
 nEpochs = 10000
 alpha = 0.5
 
 FFNet = NeuralNet.NeuralNet( LearningRate=alpha, InitMethod='He' )
 FFNet.Append( NNLayers.InputLayer( X ) )
-FFNet.Append( NNLayers.FeedFwdLayer( nnodes=10, actfcn='Sigmoid' ) )
-FFNet.Append( NNLayers.FeedFwdLayer( nnodes=20, actfcn='Sigmoid' ) )
-FFNet.Append( NNLayers.FeedFwdLayer( nnodes=1, actfcn='Sigmoid' ) )
-FFNet.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
+FFNet.Append( NNLayers.OutputLayer( nnodes=1, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy'  ) )
+
+ol2 = NNLayers.OutputLayer( nnodes=5, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy' )
 
 # Visualize Net
 #FFNet.Draw()
@@ -58,8 +58,8 @@ FFNet.Append( NNLayers.OutputLayer( Y, 'CrossEntropy' ) )
 FFNet.Train( nEpochs )
 
 # Evaluate Net
-X, Y = load_planar_dataset( 1000 )
-#X, Y = load_sign_class_dataset( 1000 )
+#X, Y = load_planar_dataset( 1000 )
+X, Y = load_sign_class_dataset( 1000 )
 rateCorrect = FFNet.Eval( X, Y )
 print( '=> Evaluating Net: Percent correct = %f' % (rateCorrect * 100) )
 
