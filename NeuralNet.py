@@ -70,6 +70,9 @@ class NeuralNet:
     def Reset( self ):
         pass
 
+    def Info():
+        pass
+        
     def Draw( self ):
         fig, ax = plt.subplots() # note we must use plt.subplots, not plt.subplot
         for i in range( self.nLayers-1 ):
