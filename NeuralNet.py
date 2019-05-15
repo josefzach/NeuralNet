@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class NeuralNet:
-    def __init__( self, LearningRate=0.5, InitMethod='He', RegularizationParam=0.0 ):
+    def __init__( self, LearningRate=0.5, InitMethod='He', RegularizationParam=0.0, KeepProb=1.0 ):
         self.nnLayers = list()
         self.nLayers = 0
 
@@ -11,6 +11,7 @@ class NeuralNet:
         self.initMethod = InitMethod
         self.learningRate = LearningRate
         self.regularizationParam = RegularizationParam
+        self.keepProb = KeepProb
 
         self.Cost = np.array([[]])
         
@@ -19,7 +20,7 @@ class NeuralNet:
         
         if self.nLayers > 0:      
             self.nnLayers[-1].SetNNodesPrev( self.nnLayers[-2].GetNNodes() )
-            self.nnLayers[-1].Initialize( initMethod=self.initMethod )
+            self.nnLayers[-1].Initialize( learningRate=self.learningRate, initMethod=self.initMethod, keepProb=self.keepProb )
     
         self.nLayers += 1
 
@@ -33,10 +34,10 @@ class NeuralNet:
         for i in range( self.nLayers-1, -1, -1 ):
             dA = self.nnLayers[i].BackwardProp( dA )  
 
-    def UpdateParams( self, alpha ):
+    def UpdateParams( self ):
         for i in range( self.nLayers ):
             #print( i )
-            A = self.nnLayers[i].UpdateParams( alpha )
+            A = self.nnLayers[i].UpdateParams()
         
     def ComputeCost( self ):
         loss = self.nnLayers[-1].L
@@ -52,7 +53,7 @@ class NeuralNet:
         for i in range( 0, nEpochs+1 ):
             self.ForwardProp()
             self.BackwardProp()
-            self.UpdateParams( self.learningRate )
+            self.UpdateParams()
             self.ComputeCost()
 
             if i % 100 == 0:
@@ -70,6 +71,12 @@ class NeuralNet:
     def Reset( self ):
         pass
 
+    def Info( self ):
+        print( '============== NetInfo ================')
+        print( 'Learning Rate: %f' % (self.learningRate) )
+        print( 'Initialization Method: %s' % (self.initMethod) )
+        print( 'Keep Probability: %f' % (self.keepProb) )
+        
     def Draw( self ):
         fig, ax = plt.subplots() # note we must use plt.subplots, not plt.subplot
         for i in range( self.nLayers-1 ):

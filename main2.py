@@ -43,12 +43,12 @@ X, Y = load_sign_class_dataset( 1000 )
 nEpochs = 10000
 alpha = 0.5
 
-FFNet = NeuralNet.NeuralNet( LearningRate=alpha, InitMethod='He' )
+FFNet = NeuralNet.NeuralNet( LearningRate=alpha, InitMethod='He', KeepProb=0.8 )
 FFNet.Append( NNLayers.InputLayer( X ) )
 FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
 FFNet.Append( NNLayers.OutputLayer( nnodes=1, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy'  ) )
 
-ol2 = NNLayers.OutputLayer( nnodes=5, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy' )
+FFNet.Info()
 
 # Visualize Net
 #FFNet.Draw()
