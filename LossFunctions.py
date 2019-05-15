@@ -9,14 +9,19 @@ def Factory( lossfcn ):
         return None
 
 class CrossEntropy:
+    def __init__( self ):
+        self.eps = 1e-12
+
     def __call__( self, y, a ):
-        y = np.multiply( np.log( a ), y ) + np.multiply( np.log( 1 - a ), 1-y )
+        try:
+            y = np.multiply( np.log( a + self.eps ), y ) + np.multiply( np.log( 1 - a + self.eps ), 1-y )
+        except RuntimeWarning:
+            print( 'a was:', a )
         return y
-        #cost = -1/m * np.sum( logprobs )
     
     def gradient( self, y, a ):
         try:
-            y = np.multiply( 1/a, y ) - np.multiply( 1/( 1 - a ), 1-y )
+            y = np.multiply( 1/(a + self.eps), y ) - np.multiply( 1/( 1 - a + self.eps), 1-y )
         except RuntimeWarning:
             print( 'a was:', a )
         return y
