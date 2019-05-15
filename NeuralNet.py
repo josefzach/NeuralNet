@@ -76,6 +76,7 @@ class NeuralNet:
         print( 'Learning Rate: %f' % (self.learningRate) )
         print( 'Initialization Method: %s' % (self.initMethod) )
         print( 'Keep Probability: %f' % (self.keepProb) )
+
         
     def Draw( self ):
         fig, ax = plt.subplots() # note we must use plt.subplots, not plt.subplot

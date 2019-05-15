@@ -45,10 +45,13 @@ alpha = 0.5
 
 FFNet = NeuralNet.NeuralNet( LearningRate=alpha, InitMethod='He', KeepProb=0.8 )
 FFNet.Append( NNLayers.InputLayer( X ) )
-FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actfcn='Tanh' ) )
-FFNet.Append( NNLayers.OutputLayer( nnodes=1, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy'  ) )
+FFNet.Append( NNLayers.FeedFwdLayer( nnodes=2, actFunction='Tanh', dropRate=0.1 ) )
+FFNet.Append( NNLayers.OutputLayer( Y=Y, nnodes=1, actFunction='Sigmoid', lossFcn='CrossEntropy'  ) )
 
 FFNet.Info()
+
+#ol2 = NNLayers.OutputLayer( nnodes=5, actfcn='Sigmoid', Y=Y, lossFcn='CrossEntropy' )
+
 
 # Visualize Net
 #FFNet.Draw()

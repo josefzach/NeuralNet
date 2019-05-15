@@ -33,16 +33,17 @@ class NNLayer:
         pass
 
 class FeedFwdLayer( NNLayer ):
-    def __init__( self, nnodes, actfcn ):
+    def __init__( self, nnodes, actFunction='Sigmoid', dropRate=0.0 ):
         super( FeedFwdLayer, self ).__init__()
         self.nnodes_prev = None
         self.A_prev = None
         self.dA_prev = None
         self.nsamples = None
         self.D = None
+        self.drop_rate = dropRate
         
         self.nnodes = nnodes
-        self.actfcn = ActivationFunctions.Factory( actfcn )
+        self.actfcn = ActivationFunctions.Factory( actFunction )
         
     def __add__( self, other ):
         print( 'SELF:', self ), print( 'OTHER:', other )
@@ -68,6 +69,7 @@ class FeedFwdLayer( NNLayer ):
         else:
             self.W = np.random.randn( self.nnodes,self.nnodes_prev ) * 0.01
         
+        
         self.b = np.zeros( ( self.nnodes, 1 ) )
         print( 'Initializing Layer n with: W=%s, b= %s' % (np.array2string(self.W.T), np.array2string(self.b.T)) )
 
@@ -78,18 +80,14 @@ class FeedFwdLayer( NNLayer ):
         self.nsamples = np.shape( A_prev )[1]    # TODO: do not compute nsamples on each epoch
         self.A_prev = A_prev
         self.Z = np.dot( self.W, self.A_prev ) + self.b
-
         self.A = self.actfcn( self.Z )
-
         self.D = np.random.rand( self.A.shape[0], self.A.shape[1] )
-        self.D = self.D < self.keepProb
-
-        self.A = self.A * self.D / self.keepProb
-
+        self.D = self.D > self.drop_rate
+        self.A = self.A * self.D / (1-self.drop_rate)
         return self.A
         
     def BackwardProp( self, dA ):
-        self.dA = dA * self.D / self.keepProb
+        self.dA = dA * self.D / (1-self.drop_rate)
         self.dZ = np.multiply( self.dA, self.actfcn.gradient( self.Z ) )
         self.dW = 1 / self.nsamples * np.dot( self.dZ, np.transpose( self.A_prev ) )
         self.db = 1 / self.nsamples * np.sum( self.dZ, axis=1, keepdims=True )
@@ -122,8 +120,8 @@ class InputLayer( NNLayer ):
         return None
 
 class OutputLayer( FeedFwdLayer ): #rather inherit from non-dropout layer?
-    def __init__( self, nnodes, actfcn, Y, lossFcn ):
-        super( OutputLayer, self ).__init__( nnodes, actfcn )
+    def __init__( self, Y, nnodes, actFunction='Sigmoid', lossFcn='CrossEntropy' ):
+        super( OutputLayer, self ).__init__( nnodes, actFunction )
 
         self.Y = Y 
         self.lossFcn = LossFunctions.Factory( lossFcn )
